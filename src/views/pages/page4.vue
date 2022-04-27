@@ -4,6 +4,8 @@
     <p>월 2,000,000원 씩 쓰려면 (현재 나이 40세)</p>
   </div>
   <Chart :options="chartOptions" />
+  <div class="chart-range-bar" />
+  <input type="range" class="chart-range" v-model="chartRangeValue" @change="onChangeChartRange" @input="onInputChartRange" min="40" max="80">
   <div>
     <p>
       <button @click="onClickChangeData">차트 변경 테스트</button>
@@ -22,7 +24,7 @@
 
 <script lang="ts">
 import { Chart } from 'highcharts-vue'
-import { defineComponent, reactive } from 'vue'
+import { defineComponent, reactive, ref } from 'vue'
 import { logger } from '@/utils/instance.logger'
 
 export default defineComponent({
@@ -77,8 +79,8 @@ export default defineComponent({
     }
 
     const chartOptions = reactive<any>({
-      xAxis: {
-        crosshair: true
+      yAxis: {
+        visible: false
       },
       tooltip: {
         enabled: false
@@ -98,11 +100,51 @@ export default defineComponent({
       ]
     })
 
+    const chartRangeValue = ref(10)
+    const chartRangeBarLeft = ref('0px')
+    function onChangeChartRange () {
+      onClickAgeBtn(chartRangeValue.value)
+    }
+    function onInputChartRange () {
+      const leftPercent = (chartRangeValue.value - standardAge) / (lastAge - standardAge) * 100
+      chartRangeBarLeft.value = leftPercent + '%'
+    }
+
     return {
       chartOptions,
       onClickAgeBtn,
-      onClickChangeData
+      onClickChangeData,
+      chartRangeValue,
+      chartRangeBarLeft,
+      onChangeChartRange,
+      onInputChartRange
     }
   }
 })
 </script>
+
+<style lang="scss" scoped>
+.chart-range {
+  width: 100%;
+  -webkit-appearance: none;
+  background: transparent;
+  position: absolute;
+  bottom: 122px;
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    border: none;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: goldenrod;
+  }
+}
+.chart-range-bar {
+  height: 250px;
+  width: 3px;
+  background: gray;
+  position: relative;
+  left: v-bind(chartRangeBarLeft);
+  bottom: 322px;
+}
+</style>
